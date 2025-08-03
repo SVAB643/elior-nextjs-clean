@@ -114,17 +114,19 @@ export default function LandingPage() {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         
         {/* Vidéo de fond */}
-        <video 
+        <iframe
           className="absolute inset-0 w-full h-full object-cover z-0"
-          autoPlay 
-          muted 
-          loop 
-          playsInline
-          poster="/videos/elior-hero-poster.jpg"
-        >
-          <source src="/videos/elior-hero-video.mp4" type="video/mp4" />
-          <source src="/videos/elior-hero-video.webm" type="video/webm" />
-        </video>
+          style={{
+            width: '100vw',
+            height: '100vh',
+            pointerEvents: 'none'
+          }}
+          src="https://www.youtube.com/embed/23AnzV-TfZc?autoplay=1&mute=1&loop=1&playlist=23AnzV-TfZc&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&disablekb=1&fs=0&cc_load_policy=0&playsinline=1&enablejsapi=0"
+          title="Elior Hero Video"
+          frameBorder="0"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+        ></iframe>
         
         {/* Overlay pour la lisibilité */}
         <div className="absolute inset-0 bg-black/40 z-10"></div>
