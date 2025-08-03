@@ -1,0 +1,1 @@
+export { CoverEditor } from './CoverEditor';
