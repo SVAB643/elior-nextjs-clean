@@ -103,7 +103,7 @@ export default function LandingPage() {
                     : 'bg-white/20 border border-white/30 hover:bg-white/30 text-white'
                 }`}
               >
-                Commencer
+                Acheter
               </button>
             </div>
           </div>
