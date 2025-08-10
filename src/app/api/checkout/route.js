@@ -1,19 +1,23 @@
 // src/app/api/checkout/route.js
-import { NextResponse } from "next/server";
-import Stripe from "stripe";
-import crypto from "crypto";
 
-export const runtime = "nodejs"; // par sécurité
+// ✅ Forcer Node.js (pas Edge)
+export const runtime = "nodejs";
+// (optionnel) éviter toute tentative de pré‑rendu
+export const dynamic = "force-dynamic";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
-
-function generateCode(len = 8) {
-  const raw = crypto.randomBytes(len).toString("base64url").toUpperCase().replace(/[^A-Z0-9]/g, "");
+function generateCode() {
+  // petit code lisible 8 chars -> AAAA-BBBB
+  // import dynamique pour éviter toute résolution à build-time
+  const { randomBytes } = require("crypto");
+  const raw = randomBytes(8).toString("base64url").toUpperCase().replace(/[^A-Z0-9]/g, "");
   return raw.slice(0, 4) + "-" + raw.slice(4, 8);
 }
 
 export async function POST(req) {
   try {
+    const { default: Stripe } = await import("stripe"); // ✅ import dynamique
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
+
     const { email, plan = "basic", successUrl, cancelUrl } = await req.json();
     const preAccessCode = generateCode();
 
@@ -28,9 +32,15 @@ export async function POST(req) {
       metadata: { plan, preAccessCode },
     });
 
-    return NextResponse.json({ checkoutUrl: session.url });
+    return new Response(JSON.stringify({ checkoutUrl: session.url }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
   } catch (e) {
     console.error("Checkout error:", e);
-    return NextResponse.json({ error: "Checkout failed" }, { status: 500 });
+    return new Response(JSON.stringify({ error: "Checkout failed" }), {
+      status: 500,
+      headers: { "content-type": "application/json" },
+    });
   }
 }
