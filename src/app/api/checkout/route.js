@@ -1,13 +1,11 @@
 // src/app/api/checkout/route.js
 
-// ✅ Forcer Node.js (pas Edge)
+// ✅ Force l’exécution côté Node (pas Edge) et évite tout pré‑rendu
 export const runtime = "nodejs";
-// (optionnel) éviter toute tentative de pré‑rendu
 export const dynamic = "force-dynamic";
 
+// Petit helper pour générer un code lisible AAAA-BBBB
 function generateCode() {
-  // petit code lisible 8 chars -> AAAA-BBBB
-  // import dynamique pour éviter toute résolution à build-time
   const { randomBytes } = require("crypto");
   const raw = randomBytes(8).toString("base64url").toUpperCase().replace(/[^A-Z0-9]/g, "");
   return raw.slice(0, 4) + "-" + raw.slice(4, 8);
@@ -15,7 +13,18 @@ function generateCode() {
 
 export async function POST(req) {
   try {
-    const { default: Stripe } = await import("stripe"); // ✅ import dynamique
+    // ⛳️ Import Stripe à l’exécution (pas au build)
+    const { default: Stripe } = await import("stripe");
+
+    // 🔐 Vérifs d’env (aident à diagnostiquer)
+    const missing = [];
+    if (!process.env.STRIPE_SECRET_KEY) missing.push("STRIPE_SECRET_KEY");
+    if (!process.env.STRIPE_PRICE_ID) missing.push("STRIPE_PRICE_ID");
+    if (!process.env.APP_URL) missing.push("APP_URL");
+    if (missing.length) {
+      throw new Error(`Missing env: ${missing.join(", ")}`);
+    }
+
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
 
     const { email, plan = "basic", successUrl, cancelUrl } = await req.json();
@@ -23,8 +32,8 @@ export async function POST(req) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
       customer_email: email || undefined,
+      line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
       success_url:
         (successUrl || `${process.env.APP_URL}/success`) +
         `?session_id={CHECKOUT_SESSION_ID}&code=${encodeURIComponent(preAccessCode)}`,
@@ -37,10 +46,16 @@ export async function POST(req) {
       headers: { "content-type": "application/json" },
     });
   } catch (e) {
+    // 🔎 Expose l’erreur côté client pour debug rapide
     console.error("Checkout error:", e);
-    return new Response(JSON.stringify({ error: "Checkout failed" }), {
-      status: 500,
-      headers: { "content-type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({
+        error: "Checkout failed",
+        message: e?.message,
+        code: e?.code,
+        type: e?.type,
+      }),
+      { status: 500, headers: { "content-type": "application/json" } }
+    );
   }
 }
