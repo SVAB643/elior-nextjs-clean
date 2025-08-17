@@ -125,8 +125,7 @@ export default function EliorApp() {
   const [activeChapter, setActiveChapter] = useState(1);
   const [activeQuestion, setActiveQuestion] = useState(null);
   
-  // NOUVEAUX ÉTATS pour l'IA temps réel
-  const [partialTranscription, setPartialTranscription] = useState('');
+  // NOUVEAUX ÉTATS pour l'IA
   const [suggestedFollowUp, setSuggestedFollowUp] = useState(null);
   const [isAnalyzingResponse, setIsAnalyzingResponse] = useState(false);
   
@@ -272,11 +271,11 @@ export default function EliorApp() {
     return question ? question.title : "";
   }, [activeQuestion, activeChapter, chapters]);
 
-  // NOUVELLE FONCTION : Analyser les points intéressants en temps réel
-  const analyzeForInterestingPoints = useCallback(async (transcript) => {
-    // Éviter trop d'appels API - analyser seulement tous les 100 caractères
-    if (transcript.length < 100 || transcript.length % 100 !== 0) return;
+  // NOUVELLE FONCTION : Analyser la réponse et proposer une question de suivi
+  const analyzeResponseAndSuggestFollowUp = useCallback(async (transcription) => {
+    if (transcription.length < 50) return; // Minimum de contenu pour analyser
     
+    console.log('🧠 Début analyse IA pour:', transcription.slice(0, 100) + '...');
     setIsAnalyzingResponse(true);
     
     try {
@@ -284,27 +283,69 @@ export default function EliorApp() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          transcript,
+          transcript: transcription,
           currentQuestion: getActiveQuestionText()
         }),
       });
       
       const result = await response.json();
+      console.log('📊 Résultat API analyze-realtime:', result);
       
-      if (result.hasInterestingPoint && result.confidence > 0.7) {
-        // Proposer une question de suivi pendant l'enregistrement
-        setSuggestedFollowUp({
+      if (result.hasInterestingPoint && result.followUpQuestion) {
+        const suggestion = {
           question: result.followUpQuestion,
-          confidence: result.confidence,
-          trigger: result.interestingPoint
-        });
+          specificElement: result.specificElement,
+          confidence: result.confidence || 0.8
+        };
+        console.log('✨ Suggestion créée:', suggestion);
+        setSuggestedFollowUp(suggestion);
+      } else {
+        console.log('❌ Pas de suggestion créée - conditions non remplies');
       }
     } catch (error) {
-      console.error('Erreur analyse temps réel:', error);
+      console.error('❌ Erreur analyse IA:', error);
     } finally {
       setIsAnalyzingResponse(false);
     }
   }, [getActiveQuestionText]);
+
+  // Gestion de l'acceptation de question de suivi
+  const handleAcceptFollowUp = useCallback(() => {
+    if (!suggestedFollowUp) return;
+    
+    console.log('✅ Acceptation question IA:', suggestedFollowUp.question);
+    
+    // Créer la question de suivi comme question SUPPLÉMENTAIRE (pas de remplacement)
+    const followUpQuestion = {
+      id: Date.now(),
+      title: `💡 ${suggestedFollowUp.question.slice(0, 50)}...`, // Titre tronqué avec indicateur
+      text: suggestedFollowUp.question,
+      isAI: true,
+      isFollowUp: true,
+      isSupplementary: true, // Marquer comme supplémentaire
+      trigger: suggestedFollowUp.specificElement,
+      parentQuestionId: activeQuestion,
+      confidence: suggestedFollowUp.confidence
+    };
+    
+    // L'ajouter aux questions du chapitre actif SANS changer la question courante
+    setChapters(prev => prev.map(chapter => 
+      chapter.id === activeChapter
+        ? { ...chapter, questions: [...chapter.questions, followUpQuestion] }
+        : chapter
+    ));
+    
+    // NE PAS changer la question active - laisser l'utilisateur la sélectionner manuellement
+    // setActiveQuestion(followUpQuestion.id); // ← Ligne supprimée
+    setSuggestedFollowUp(null);
+    
+    console.log('✅ Question supplémentaire ajoutée au chapitre - sélectionnez-la manuellement dans la sidebar');
+  }, [suggestedFollowUp, activeChapter, activeQuestion]);
+
+  const handleDeclineFollowUp = useCallback(() => {
+    console.log('❌ Suggestion IA rejetée');
+    setSuggestedFollowUp(null);
+  }, []);
 
   // Lecture de la question (avec synthèse vocale si disponible)
   const playQuestion = useCallback(async (text) => {
@@ -336,7 +377,7 @@ export default function EliorApp() {
     }
   }, []);
 
-  // Transcription avec OpenAI
+  // Transcription avec OpenAI (uniquement à la fin de l'enregistrement)
   const transcribeAudioWithOpenAI = useCallback(async () => {
     try {
       console.log("Début de la transcription...");
@@ -376,6 +417,9 @@ export default function EliorApp() {
             : chapter
         ));
         
+        // NOUVEAU : Analyser la réponse pour suggérer une question de suivi
+        analyzeResponseAndSuggestFollowUp(result.transcription);
+        
       } else {
         console.error("Erreur transcription:", result.error);
         alert("Erreur lors de la transcription: " + result.error);
@@ -388,9 +432,9 @@ export default function EliorApp() {
       setState(prev => ({ ...prev, isTranscribing: false }));
       refs.current.audioChunks = [];
     }
-  }, [activeChapter, activeQuestion]);
+  }, [activeChapter, activeQuestion, analyzeResponseAndSuggestFollowUp]);
 
-  // Démarrage de l'enregistrement RÉEL avec transcription temps réel
+  // Démarrage de l'enregistrement simplifié (sans transcription temps réel)
   const startRecording = useCallback(async () => {
     try {
       console.log("Démarrage de l'enregistrement...");
@@ -413,42 +457,11 @@ export default function EliorApp() {
       });
       refs.current.mediaRecorder = mediaRecorder;
       
-      // MODIFIÉ : Collecter les chunks audio avec transcription temps réel
-      mediaRecorder.addEventListener('dataavailable', async (event) => {
+      // Collecter les chunks audio (sans transcription temps réel)
+      mediaRecorder.addEventListener('dataavailable', (event) => {
         if (event.data.size > 0) {
           refs.current.audioChunks.push(event.data);
           console.log("Chunk audio reçu:", event.data.size, "bytes");
-          
-          // NOUVEAU : Transcription en temps réel pour l'analyse
-          if (refs.current.audioChunks.length > 0) {
-            try {
-              // Créer un blob temporaire pour transcription partielle
-              const tempBlob = new Blob(refs.current.audioChunks, { type: 'audio/webm' });
-              
-              // Transcription rapide (seulement si le blob est assez gros)
-              if (tempBlob.size > 50000) { // ~3-5 secondes d'audio
-                const formData = new FormData();
-                formData.append('audio', tempBlob, 'temp.webm');
-                
-                const response = await fetch('/api/transcribe', {
-                  method: 'POST',
-                  body: formData,
-                });
-                
-                const result = await response.json();
-                
-                if (result.success && result.transcription) {
-                  const newTranscript = result.transcription;
-                  setPartialTranscription(newTranscript);
-                  
-                  // Analyser pour points intéressants
-                  analyzeForInterestingPoints(newTranscript);
-                }
-              }
-            } catch (error) {
-              console.error('Erreur transcription temps réel:', error);
-            }
-          }
         }
       });
       
@@ -458,8 +471,6 @@ export default function EliorApp() {
         await transcribeAudioWithOpenAI();
         // Nettoyer le stream
         stream.getTracks().forEach(track => track.stop());
-        // Réinitialiser la transcription partielle
-        setPartialTranscription('');
       });
       
       // Analyse du niveau audio en temps réel
@@ -492,7 +503,7 @@ export default function EliorApp() {
       console.error("Erreur accès micro:", error);
       alert("Impossible d'accéder au microphone. Vérifiez les permissions.");
     }
-  }, [state.isRecording, transcribeAudioWithOpenAI, analyzeForInterestingPoints]);
+  }, [state.isRecording, transcribeAudioWithOpenAI]);
 
   // Arrêt de l'enregistrement
   const stopRecording = useCallback(() => {
@@ -618,47 +629,6 @@ export default function EliorApp() {
         : chapter
     ));
   }, [activeChapter]);
-
-  // NOUVELLES FONCTIONS pour l'IA temps réel
-  
-  // Gestion de l'acceptation de question de suivi
-  const handleAcceptFollowUp = useCallback(() => {
-    if (!suggestedFollowUp) return;
-    
-    // Arrêter l'enregistrement actuel
-    stopRecording();
-    
-    // Créer la question de suivi
-    const followUpQuestion = {
-      id: Date.now(),
-      title: "Question de suivi",
-      text: suggestedFollowUp.question,
-      isFollowUp: true,
-      trigger: suggestedFollowUp.trigger,
-      parentQuestionId: activeQuestion
-    };
-    
-    // L'ajouter aux questions du chapitre actif
-    setChapters(prev => prev.map(chapter => 
-      chapter.id === activeChapter
-        ? { ...chapter, questions: [...chapter.questions, followUpQuestion] }
-        : chapter
-    ));
-    
-    // Sélectionner cette nouvelle question
-    setActiveQuestion(followUpQuestion.id);
-    setSuggestedFollowUp(null);
-    setPartialTranscription('');
-    
-    // Relancer l'enregistrement après un délai
-    setTimeout(() => {
-      setState(prev => ({ ...prev, countdown: 3 }));
-    }, 1000);
-  }, [suggestedFollowUp, activeChapter, activeQuestion, stopRecording]);
-
-  const handleDeclineFollowUp = useCallback(() => {
-    setSuggestedFollowUp(null);
-  }, []);
 
   // === FONCTION DE FALLBACK ===
   const generateFallbackHTML = useCallback((chapters) => {
@@ -959,11 +929,9 @@ ${answeredQuestions.map(question => {
             currentQuestion={getActiveQuestionText()}
             hasQuestionSelected={!!activeQuestion}
             selectedQuestionTitle={getActiveQuestionTitle()}
-            
-            // NOUVELLES PROPS pour l'IA temps réel
-            partialTranscription={partialTranscription}
-            suggestedFollowUp={suggestedFollowUp}
+            // Props pour l'IA
             isAnalyzingResponse={isAnalyzingResponse}
+            suggestedFollowUp={suggestedFollowUp}
             onAcceptFollowUp={handleAcceptFollowUp}
             onDeclineFollowUp={handleDeclineFollowUp}
           />

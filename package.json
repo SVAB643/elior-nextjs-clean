@@ -10,6 +10,17 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.53.0",
+    "@tiptap/extension-color": "^3.2.0",
+    "@tiptap/extension-font-family": "^3.2.0",
+    "@tiptap/extension-heading": "^3.2.0",
+    "@tiptap/extension-image": "^3.2.0",
+    "@tiptap/extension-link": "^3.2.0",
+    "@tiptap/extension-list-item": "^3.2.0",
+    "@tiptap/extension-text-align": "^3.2.0",
+    "@tiptap/extension-text-style": "^3.2.0",
+    "@tiptap/extension-underline": "^3.2.0",
+    "@tiptap/react": "^3.2.0",
+    "@tiptap/starter-kit": "^3.2.0",
     "formidable": "^3.5.4",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
@@ -18,7 +29,9 @@
     "openai": "^5.10.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "stripe": "^18.4.0"
+    "react-rnd": "^10.5.2",
+    "stripe": "^18.4.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

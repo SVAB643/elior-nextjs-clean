@@ -9,16 +9,16 @@ import {
   Link2Off, RemoveFormatting, Pilcrow, Code
 } from "lucide-react";
 
-// Import du composant ImageCanvas amélioré
+// Import du composant ImageCanvas amÃ©liorÃ©
 import { ImageCanvas } from './ImageCanvas';
 
 /**
  * IMPORTANT :
  * - Cette version reprend exactement votre structure et votre direction artistique,
- *   mais corrige plusieurs détails d'ergonomie et de robustesse.
- * - Elle ajoute des fonctionnalités d'édition demandées par vos utilisateurs
+ *   mais corrige plusieurs dÃ©tails d'ergonomie et de robustesse.
+ * - Elle ajoute des fonctionnalitÃ©s d'Ã©dition demandÃ©es par vos utilisateurs
  *   (undo/redo, titres, liens, citation, code, nettoyage, etc.) tout en gardant
- *   la compatibilité avec un site déjà imbriqué.
+ *   la compatibilitÃ© avec un site dÃ©jÃ  imbriquÃ©.
  */
 
 export const BookEditor = ({
@@ -33,9 +33,9 @@ export const BookEditor = ({
   const [zoom, setZoom] = useState(100);
   const [content, setContent] = useState(initialContent || `
     <h1 style="text-align: center; margin-bottom: 2em; color: #374151; font-weight: 300; font-size: 2.5em;">Mon Livre</h1>
-    <p style="margin-bottom: 1.5em; text-indent: 2em; line-height: 1.8;">Commencez à écrire votre histoire ici. Cette zone d'édition vous permet de créer un livre professionnel avec toutes les fonctionnalités de mise en forme nécessaires.</p>
-    <p style="margin-bottom: 1.5em; text-indent: 2em; line-height: 1.8;">Utilisez la barre d'outils pour formater votre texte et ajouter des images via le panneau dédié. Les images apparaîtront directement dans votre page et le texte s'adaptera automatiquement autour d'elles.</p>
-    <p style="margin-bottom: 1.5em; text-indent: 2em; line-height: 1.8;">Vous pouvez déplacer les images librement, les redimensionner, et voir le résultat en temps réel pendant que vous écrivez votre livre.</p>
+    <p style="margin-bottom: 1.5em; text-indent: 2em; line-height: 1.8;">Commencez Ã  Ã©crire votre histoire ici. Cette zone d'Ã©dition vous permet de crÃ©er un livre professionnel avec toutes les fonctionnalitÃ©s de mise en forme nÃ©cessaires.</p>
+    <p style="margin-bottom: 1.5em; text-indent: 2em; line-height: 1.8;">Utilisez la barre d'outils pour formater votre texte et ajouter des images via le panneau dÃ©diÃ©. Les images apparaÃ®tront directement dans votre page et le texte s'adaptera automatiquement autour d'elles.</p>
+    <p style="margin-bottom: 1.5em; text-indent: 2em; line-height: 1.8;">Vous pouvez dÃ©placer les images librement, les redimensionner, et voir le rÃ©sultat en temps rÃ©el pendant que vous Ã©crivez votre livre.</p>
   `);
   const [activeTools, setActiveTools] = useState(new Set());
   const [showImageCanvas, setShowImageCanvas] = useState(false);
@@ -43,7 +43,7 @@ export const BookEditor = ({
   const [selectedImageId, setSelectedImageId] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // ============ Styles CSS intégrés (inchangés + petites améliorations) ============
+  // ============ Styles CSS intÃ©grÃ©s (inchangÃ©s + petites amÃ©liorations) ============
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -105,11 +105,11 @@ export const BookEditor = ({
       imageElement.innerHTML = `
         <img src="${image.src}" alt="${image.alt}" draggable="false" />
         <div class="image-controls">
-          <button class="control-btn" data-action="float-left" title="Flotter à gauche">⬅</button>
-          <button class="control-btn" data-action="float-center" title="Centrer">⬛</button>
-          <button class="control-btn" data-action="float-right" title="Flotter à droite">➡</button>
-          <button class="control-btn" data-action="float-none" title="Position libre">↗</button>
-          <button class="control-btn" data-action="remove" title="Supprimer" style="background: rgba(239,68,68,.9);">✕</button>
+          <button class="control-btn" data-action="float-left" title="Flotter Ã  gauche">â¬…</button>
+          <button class="control-btn" data-action="float-center" title="Centrer">â¬›</button>
+          <button class="control-btn" data-action="float-right" title="Flotter Ã  droite">âž¡</button>
+          <button class="control-btn" data-action="float-none" title="Position libre">â†—</button>
+          <button class="control-btn" data-action="remove" title="Supprimer" style="background: rgba(239,68,68,.9);">âœ•</button>
         </div>
         <div class="resize-handles">
           <div class="resize-handle nw"></div>
@@ -130,7 +130,7 @@ export const BookEditor = ({
   }, []);
 
   const setupImageInteractions = useCallback((imageElement, imageId, currentZoom) => {
-    // Sélection
+    // SÃ©lection
     imageElement.addEventListener('click', (e) => {
       e.stopPropagation();
       setSelectedImageId(imageId);
@@ -151,7 +151,7 @@ export const BookEditor = ({
       });
     });
 
-    // Drag & Drop (corrigé avec compensation du zoom)
+    // Drag & Drop (corrigÃ© avec compensation du zoom)
     imageElement.addEventListener('mousedown', (e) => {
       if (e.target.classList.contains('resize-handle') || e.target.classList.contains('control-btn')) return;
       e.preventDefault();
@@ -186,7 +186,7 @@ export const BookEditor = ({
       document.addEventListener('mouseup', handleMouseUp);
     });
 
-    // Redimensionnement (préserve le ratio)
+    // Redimensionnement (prÃ©serve le ratio)
     const resizeHandles = imageElement.querySelectorAll('.resize-handle');
     resizeHandles.forEach((handle) => {
       handle.addEventListener('mousedown', (e) => {
@@ -222,7 +222,7 @@ export const BookEditor = ({
   // Re-rendu des images quand elles changent
   useEffect(() => { renderImagesInPage(); }, [renderImagesInPage]);
 
-  // ============ Export PDF (votre logique conservée) ============
+  // ============ Export PDF (votre logique conservÃ©e) ============
   const exportToPDF = useCallback(async () => {
     try {
       let jsPDF, html2canvas;
@@ -231,20 +231,20 @@ export const BookEditor = ({
         jsPDF = jsPDFModule.default;
         html2canvas = (await import('html2canvas')).default;
       } catch (importError) {
-        alert(`❌ Dépendances manquantes !\n\nInstallez d'abord :\nnpm install jspdf html2canvas\n\nPuis redémarrez votre serveur.`);
+        alert(`âŒ DÃ©pendances manquantes !\n\nInstallez d'abord :\nnpm install jspdf html2canvas\n\nPuis redÃ©marrez votre serveur.`);
         return;
       }
 
-      // Overlay de progression (identique, esthétique conservée)
+      // Overlay de progression (identique, esthÃ©tique conservÃ©e)
       const progressDiv = document.createElement('div');
       progressDiv.innerHTML = `
         <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(255,107,53,.95), rgba(247,147,30,.95)); display: flex; align-items: center; justify-content: center; z-index: 10000; color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
           <div style="text-align: center; max-width: 450px; padding: 40px;">
-            <div style="font-size: 28px; margin-bottom: 25px; font-weight: 300;">📚 Génération du PDF...</div>
+            <div style="font-size: 28px; margin-bottom: 25px; font-weight: 300;">ðŸ“š GÃ©nÃ©ration du PDF...</div>
             <div style="background: rgba(255,255,255,.25); border-radius: 15px; padding: 6px; margin-bottom: 20px; backdrop-filter: blur(10px);">
               <div id="progress-bar" style="width: 0%; height: 12px; background: linear-gradient(90deg, white, rgba(255,255,255,.9)); border-radius: 10px; transition: width .5s cubic-bezier(.4,0,.2,1); box-shadow: 0 2px 10px rgba(255,255,255,.3);"></div>
             </div>
-            <div id="progress-text" style="font-size: 16px; opacity: .95; font-weight: 300;">Préparation du contenu...</div>
+            <div id="progress-text" style="font-size: 16px; opacity: .95; font-weight: 300;">PrÃ©paration du contenu...</div>
           </div>
         </div>`;
       document.body.appendChild(progressDiv);
@@ -255,14 +255,14 @@ export const BookEditor = ({
         if (textEl) textEl.textContent = text;
       };
 
-      updateProgress(15, 'Préparation de la page...');
+      updateProgress(15, 'PrÃ©paration de la page...');
 
-      // Conteneur dédié à l'export
+      // Conteneur dÃ©diÃ© Ã  l'export
       const exportContainer = document.createElement('div');
       exportContainer.style.cssText = `
         width: 210mm !important; min-height: 297mm !important; padding: 20mm !important; background: white !important; font-family: "Times New Roman", serif !important; font-size: 12pt !important; line-height: 1.6 !important; color: black !important; position: relative !important; box-sizing: border-box !important; overflow: visible !important;`;
 
-      updateProgress(35, 'Intégration du texte...');
+      updateProgress(35, 'IntÃ©gration du texte...');
 
       const clonedContent = editorRef.current.cloneNode(true);
       clonedContent.style.position = 'relative';
@@ -306,7 +306,7 @@ export const BookEditor = ({
       });
 
       document.body.removeChild(exportContainer);
-      updateProgress(95, 'Génération du fichier PDF...');
+      updateProgress(95, 'GÃ©nÃ©ration du fichier PDF...');
 
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -333,9 +333,9 @@ export const BookEditor = ({
         successDiv.innerHTML = `
           <div style="position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(16,185,129,.4); z-index: 10000; font-family: sans-serif; font-size: 15px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.2);">
             <div style="display:flex; align-items:center; gap:10px;">
-              <div style="font-size:24px;">✅</div>
+              <div style="font-size:24px;">âœ…</div>
               <div>
-                <div style="font-weight:600;">PDF généré avec succès !</div>
+                <div style="font-weight:600;">PDF gÃ©nÃ©rÃ© avec succÃ¨s !</div>
                 <div style="opacity:.9; font-size:13px; margin-top:2px;">${fileName}</div>
               </div>
             </div>
@@ -352,11 +352,11 @@ export const BookEditor = ({
       }, 1000);
     } catch (error) {
       console.error('Erreur export PDF:', error);
-      alert(`❌ Erreur lors de l'export PDF: ${error.message}`);
+      alert(`âŒ Erreur lors de l'export PDF: ${error.message}`);
     }
   }, [images]);
 
-  // ============ Gestion du contenu & execCommand (conservés + ajouts) ============
+  // ============ Gestion du contenu & execCommand (conservÃ©s + ajouts) ============
   const updateContent = useCallback(() => {
     if (editorRef.current) {
       const newContent = editorRef.current.innerHTML;
@@ -368,8 +368,8 @@ export const BookEditor = ({
   }, [onChange]);
 
   const exec = useCallback((command, value = null) => {
-    // document.execCommand est encore supporté par la plupart des navigateurs de bureau.
-    // Pour rester simple et compatible dans un site imbriqué, on garde cette API.
+    // document.execCommand est encore supportÃ© par la plupart des navigateurs de bureau.
+    // Pour rester simple et compatible dans un site imbriquÃ©, on garde cette API.
     document.execCommand(command, false, value);
     const newActiveTools = new Set();
     if (document.queryCommandState('bold')) newActiveTools.add('bold');
@@ -438,20 +438,20 @@ export const BookEditor = ({
     }
   }, [exec, onSave, selectedImageId]);
 
-  // Nettoyage du collage (empêche le style parasite)
+  // Nettoyage du collage (empÃªche le style parasite)
   const handlePaste = useCallback((e) => {
     e.preventDefault();
     const text = (e.clipboardData || window.clipboardData).getData('text/plain');
     document.execCommand('insertText', false, text);
   }, []);
 
-  // ============ Handlers ImageCanvas -> état React ============
+  // ============ Handlers ImageCanvas -> Ã©tat React ============
   const handleImagesUpdate = useCallback((newImages) => { setImages(newImages); }, []);
   const handlePageClick = useCallback((e) => {
     if (e.target === imageContainerRef.current || e.target === editorRef.current) setSelectedImageId(null);
   }, []);
 
-  // Wire des fonctions globales (compatibilité avec vos CustomEvents)
+  // Wire des fonctions globales (compatibilitÃ© avec vos CustomEvents)
   useEffect(() => {
     const updateFloat = (imageId, float) => setImages(prev => prev.map(i => i.id === imageId ? { ...i, float } : i));
     const removeFromState = (imageId) => setImages(prev => prev.filter(i => i.id !== imageId));
@@ -469,12 +469,12 @@ export const BookEditor = ({
   // ============ Rendu JSX ============
   return (
     <div className="flex-1 flex h-full bg-gray-50">
-      {/* Zone d'édition principale */}
+      {/* Zone d'Ã©dition principale */}
       <div className="flex-1 flex flex-col">
-        {/* Barre d'outils améliorée */}
+        {/* Barre d'outils amÃ©liorÃ©e */}
         <div className="bg-white border-b border-gray-100 p-4 flex-shrink-0 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
-            {/* Gras / Italique / Souligné */}
+            {/* Gras / Italique / SoulignÃ© */}
             <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 border border-gray-100">
               {[
                 { command: 'bold', icon: Bold, shortcut: 'Ctrl+B' },
@@ -497,8 +497,8 @@ export const BookEditor = ({
                   <Icon size={16} />
                 </button>
               ))}
-              {/* Barré */}
-              <button onClick={() => exec('strikeThrough')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600 transition-all duration-300" title="Barré">
+              {/* BarrÃ© */}
+              <button onClick={() => exec('strikeThrough')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600 transition-all duration-300" title="BarrÃ©">
                 <Strikethrough size={16} />
               </button>
             </div>
@@ -534,10 +534,10 @@ export const BookEditor = ({
 
             {/* Listes */}
             <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 border border-gray-100">
-              <button onClick={() => exec('insertUnorderedList')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600 transition-all duration-300" title="Liste à puces">
+              <button onClick={() => exec('insertUnorderedList')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600 transition-all duration-300" title="Liste Ã  puces">
                 <List size={16} />
               </button>
-              <button onClick={() => exec('insertOrderedList')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600 transition-all duration-300" title="Liste numérotée">
+              <button onClick={() => exec('insertOrderedList')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600 transition-all duration-300" title="Liste numÃ©rotÃ©e">
                 <ListOrdered size={16} />
               </button>
               <button onClick={() => exec('formatBlock', '<BLOCKQUOTE>')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600" title="Citation">
@@ -555,13 +555,13 @@ export const BookEditor = ({
             <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-2 border border-gray-100">
               <Type size={16} className="text-gray-600" />
               <select onChange={(e) => exec('fontSize', e.target.value)} className="bg-transparent border-none outline-none text-sm text-gray-700 font-light cursor-pointer" defaultValue="3">
-                <option value="1">Très petit</option>
+                <option value="1">TrÃ¨s petit</option>
                 <option value="2">Petit</option>
                 <option value="3">Normal</option>
                 <option value="4">Moyen</option>
                 <option value="5">Grand</option>
-                <option value="6">Très grand</option>
-                <option value="7">Énorme</option>
+                <option value="6">TrÃ¨s grand</option>
+                <option value="7">Ã‰norme</option>
               </select>
             </div>
 
@@ -580,7 +580,7 @@ export const BookEditor = ({
 
             {/* Liens */}
             <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 border border-gray-100">
-              <button onClick={createLink} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600" title="Insérer un lien">
+              <button onClick={createLink} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600" title="InsÃ©rer un lien">
                 <LinkIcon size={16} />
               </button>
               <button onClick={removeLink} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600" title="Supprimer le lien">
@@ -595,7 +595,7 @@ export const BookEditor = ({
               style={{ background: showImageCanvas ? 'linear-gradient(135deg, #f7931e, #ff6b35)' : 'linear-gradient(135deg, #ff6b35, #f7931e)' }}
             >
               <ImageIcon size={16} />
-              {showImageCanvas ? 'Masquer Images' : 'Gérer Images'}
+              {showImageCanvas ? 'Masquer Images' : 'GÃ©rer Images'}
               {images.length > 0 && (
                 <span className="bg-white bg-opacity-30 px-2 py-0.5 rounded-full text-xs font-medium">{images.length}</span>
               )}
@@ -617,16 +617,16 @@ export const BookEditor = ({
             {/* Undo/Redo rapides */}
             <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 border border-gray-100">
               <button onClick={() => exec('undo')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600" title="Annuler (Ctrl+Z)"><Undo2 size={16} /></button>
-              <button onClick={() => exec('redo')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600" title="Rétablir (Ctrl+Y)"><Redo2 size={16} /></button>
+              <button onClick={() => exec('redo')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm text-gray-600" title="RÃ©tablir (Ctrl+Y)"><Redo2 size={16} /></button>
             </div>
 
             {/* Actions principales */}
             <div className="flex items-center gap-2">
-              <button onClick={() => handleZoomChange(100)} className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 text-sm font-light" title="Réinitialiser zoom">
+              <button onClick={() => handleZoomChange(100)} className="flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-300 text-sm font-light" title="RÃ©initialiser zoom">
                 <RotateCcw size={14} />
                 Reset
               </button>
-              <button onClick={exportToPDF} className="flex items-center gap-2 px-4 py-2 text-white rounded-xl transition-all duration-300 text-sm font-light shadow-lg hover:scale-105 hover:shadow-xl" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }} title="Exporter en PDF haute qualité (texte + images)">
+              <button onClick={exportToPDF} className="flex items-center gap-2 px-4 py-2 text-white rounded-xl transition-all duration-300 text-sm font-light shadow-lg hover:scale-105 hover:shadow-xl" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }} title="Exporter en PDF haute qualitÃ© (texte + images)">
                 <FileText size={16} />
                 Export PDF
               </button>
@@ -646,7 +646,7 @@ export const BookEditor = ({
           </div>
         </div>
 
-        {/* Zone d'édition ultra-fluide avec images intégrées */}
+        {/* Zone d'Ã©dition ultra-fluide avec images intÃ©grÃ©es */}
         <div className="flex-1 overflow-auto bg-gradient-to-b from-gray-100 to-gray-200 p-8" style={{ height: 'calc(100vh - 140px)' }}>
           <div className="mx-auto transition-all duration-500 ease-out" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center', paddingBottom: '100px' }}>
             {/* Page A4 */}
@@ -658,7 +658,7 @@ export const BookEditor = ({
               {/* Conteneur d'images (overlay) */}
               <div ref={imageContainerRef} className="absolute inset-0" style={{ pointerEvents: 'none', zIndex: 10 }} />
 
-              {/* Zone d'édition de texte */}
+              {/* Zone d'Ã©dition de texte */}
               <div
                 ref={(el) => { editorRef.current = el; initializeContent(el); }}
                 contentEditable
@@ -670,28 +670,28 @@ export const BookEditor = ({
                 style={{ fontSize: '16px', lineHeight: '1.8', minHeight: '24.7cm', maxHeight: 'none', wordWrap: 'break-word', overflowWrap: 'break-word', whiteSpace: 'pre-wrap', zIndex: 1, pointerEvents: 'all' }}
                 tabIndex={0}
                 spellCheck={true}
-                placeholder="Commencez à écrire votre livre ici..."
+                placeholder="Commencez Ã  Ã©crire votre livre ici..."
               />
             </div>
           </div>
         </div>
 
-        {/* Barre d'état */}
+        {/* Barre d'Ã©tat */}
         <div className="bg-white border-t border-gray-100 px-6 py-2 text-xs text-gray-500 font-light flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span>Format A4 • 21 × 29,7 cm</span>
+            <span>Format A4 â€¢ 21 Ã— 29,7 cm</span>
             <span>Zoom: {zoom}%</span>
             {images.length > 0 && (
-              <span className="text-orange-600">{images.length} image(s) • {images.filter(img => img.visible).length} visible(s)</span>
+              <span className="text-orange-600">{images.length} image(s) â€¢ {images.filter(img => img.visible).length} visible(s)</span>
             )}
             {selectedImageId && (
-              <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-md">✨ Image sélectionnée • Del: supprimer</span>
+              <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded-md">âœ¨ Image sÃ©lectionnÃ©e â€¢ Del: supprimer</span>
             )}
           </div>
           <div className="flex items-center gap-4">
-            <span>🎨 Images intégrées en temps réel</span>
-            <span>📄 Export PDF ultra-qualité</span>
-            <span>⚡ Interface ultra-fluide</span>
+            <span>ðŸŽ¨ Images intÃ©grÃ©es en temps rÃ©el</span>
+            <span>ðŸ“„ Export PDF ultra-qualitÃ©</span>
+            <span>âš¡ Interface ultra-fluide</span>
           </div>
         </div>
       </div>
@@ -712,7 +712,7 @@ export const BookEditor = ({
   );
 };
 
-// Fonctions globales pour la manipulation d'images (compatibilité avec votre code)
+// Fonctions globales pour la manipulation d'images (compatibilitÃ© avec votre code)
 if (typeof window !== 'undefined') {
   window.setImageFloat = (imageId, float) => {
     window.dispatchEvent(new CustomEvent('setImageFloat', { detail: { imageId, float } }));

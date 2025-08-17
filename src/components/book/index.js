@@ -1,1 +1,1 @@
-export { BookEditor } from './BookEditor';
+export { default as BookEditor } from './BookEditor';
